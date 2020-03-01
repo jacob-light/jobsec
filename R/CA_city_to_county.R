@@ -37,4 +37,7 @@ CA_city_to_county <- function() {
   # Return city-to-county mapping
   city_to_county <- tibble(county = rep(x = counties, times = sapply(cities, length)),
                            city = cities %>% unlist() %>% trimws())
+  
+  # NTD - Edit
+  saveRDS(city_to_county, file = "C:/Users/jligh/Documents/git/warn/jobsec/data/city_to_county.RDS")
 }
