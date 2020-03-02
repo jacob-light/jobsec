@@ -3,7 +3,14 @@
 #
 # Need to modeify with name of data set that will be 
 # provided win the data set: ie replace "df_ca_warn"
-
+#
+# Example Test:
+# 
+# df_ca_warn <- read_csv("~2020.02.23 WARN template.csv")
+# data <- warnExtract(by = "county", counties = c("Santa Clara", "Los Angeles"))
+# warnBar(data, "reason")
+# warnMap(data)
+#
 warnExtract <- function(start_date = -Inf , 
                         end_date = Inf, 
                         type_date = c("effective_date", "notice_date" ,"received_date"), 
