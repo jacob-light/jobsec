@@ -17,7 +17,7 @@ namer <- function(d) {
   d <- as.data.frame(d, stringsAsFactors = FALSE)
   
   # Check table width
-  if(dim(d)[2] == 7) {
+  if (dim(d)[2] == 7) {
     # Early files do not include county name
     headers <- c("notice_date", "effective_date", "received_date", "company",
                  "city", "n_employees", "layoff_reason")

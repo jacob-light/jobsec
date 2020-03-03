@@ -7,8 +7,8 @@
 #'
 #' @export
 #'
-#' @importFrom string str_replace_all
-#' @importFrom dplyr filter mutate
+#' @importFrom stringr str_replace_all
+#' @importFrom dplyr filter mutate bind_rows
 #' @importFrom magrittr %>%
 #' @importFrom lubridate mdy
 #' @importFrom tabulizer extract_tables
@@ -19,21 +19,26 @@
 #' @keywords [[NTD]]
 #'
 extracter <- function(url) {
-  # print(url)
-  out <- extract_tables(url)
+  # Extract table from web URL
+  out <- tabulizer::extract_tables(url)
   
-  # List --> data frame
-  out <- lapply(out, namer) %>% bind_rows()
+  # Take list output from extract_tables, reformat as single tibble
+  out <- lapply(out, namer) %>% 
+    dplyr::bind_rows()
   
-  # Basic cleaning
-  out <- out %>% filter(notice_date != "Notice Date")
-  out <- out %>% mutate(effective_date = str_replace_all(effective_date, " ", ""),
-                        received_date = str_replace_all(received_date, " ", ""))
+  # Data cleaning - filter errant rows
+  out <- out %>% 
+    dplyr::filter(notice_date != "Notice Date")
+  out <- out %>% 
+    dplyr::mutate(effective_date = stringr::str_replace_all(effective_date, " ", ""),
+                  received_date = stringr::str_replace_all(received_date, " ", ""))
   
-  # Convert to date
-  out <- out %>% mutate(notice_date = mdy(notice_date),
-                        effective_date = mdy(effective_date),
-                        received_date = mdy(received_date),
-                        n_employees = as.numeric(n_employees))
+  # Convert data types to date, numeric where appropriate
+  out <- out %>% 
+    dplyr::mutate(
+      notice_date = lubridate::mdy(notice_date),
+      effective_date = lubridate::mdy(effective_date),
+      received_date = lubridate::mdy(received_date),
+      n_employees = as.numeric(n_employees))
   return(out)
 }
