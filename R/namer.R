@@ -13,7 +13,6 @@
 #'
 #' @keywords [[NTD]]
 #'
-
 namer <- function(d) {
   d <- as.data.frame(d, stringsAsFactors = FALSE)
   
