@@ -8,11 +8,12 @@
 #'
 #' @export [[NTD]]
 #'
-#' @importFrom string str_replace_all   [[NTD]]
-#' @importFrom dplyr filter mutate
+#' @importFrom stringr str_replace_all   [[NTD]]
+#' @importFrom dplyr right_join select rename mutate group_by summarize ungroup slice bind_rows if_else
 #' @importFrom magrittr %>%
-#' @importFrom lubridate mdy
-#' @importFrom tabulizer extract_tables
+#' @importFrom randomForest randomForest
+#' @importFrom stats lm
+#' @importFrom lubridate year month
 #' 
 #' @examples 
 #'    [[NTD]]
@@ -28,13 +29,16 @@ modeler <- function(seed = sample(1:1000, 1)) {
   
   # Merge ACS and population data. Intermediate data frame will be unique at the
   # county-year level
-  fin_out <- right_join(macro_out,
+  fin_out <- dplyr::right_join(macro_out,
                         pop %>% 
-                          select(-c(SUMLEV, STATE, COUNTY, STNAME, AGEGRP)) %>% 
-                          rename(COUNTY = CTYNAME),
-                        by = c("YEAR", "COUNTY")) %>% 
-    select(COUNTY, YEAR, everything()) %>%
-    rename(county = COUNTY, year = YEAR)
+                          dplyr::select(-c(SUMLEV, STATE, COUNTY, STNAME, AGEGRP)) %>% 
+                          dplyr::rename(county = CTYNAME, year = YEAR),
+                        by = c("year", "county")) %>% 
+    dplyr::select(county, year, everything())
+  
+  # NOTE: ACS data are not available for all counties (only available for counties w/
+  # population > 100,000). When characteristics data are unavailable, impute
+  # characteristics from nearest county with population above 100,000.
   
   ###########################
   # 1 - Linear Regression
@@ -45,30 +49,21 @@ modeler <- function(seed = sample(1:1000, 1)) {
   # characteristics
   warn_ols <- warn %>%
     # Fiscal year: July - June
-    mutate(year = year(received_date) - if_else(month(received_date) < 7, 1, 0)) %>%
+    dplyr::mutate(year = lubridate::year(received_date) - 
+                    dplyr::if_else(lubridate::month(received_date) < 7, 1, 0)) %>%
     # Collapse WARN records to unique county-year level
-    group_by(year, county) %>%
-    summarize(n_layoffs = sum(n_employees)) %>%
+    dplyr::group_by(year, county) %>%
+    dplyr::summarize(n_layoffs = sum(n_employees)) %>%
     # Merge on lagged characteristics
-    right_join(fin_out, by = c("year", "county")) %>%
+    dplyr::right_join(fin_out, by = c("year", "county")) %>%
     # Data processing - create variables for linear regression
-    mutate(n_layoffs = if_else(is.na(n_layoffs), 0, n_layoffs),
+    dplyr::mutate(n_layoffs = dplyr::if_else(is.na(n_layoffs), 0, n_layoffs),
            ln_layoff = log(n_layoffs + 1), # Do a log x + 1 transformation, will undo when projecting
            ln_pop = log(TOT_POP),
            male_share =  TOT_MALE / TOT_POP) %>%
-    ungroup()
+    dplyr::ungroup()
   
-  # NTD: Fill in missing values for ACS data
-  
-  
-  # 1 - linear regression
-  # fatal_fe_mod <- plm(ln_layoff ~ 1 + ln_pop + male_share + colshare + hsshare + empshare + 
-  #                       agriculture + construction + manufacturing + wholesaletrade + transportation + 
-  #                       utilities + information + finance + sciencemgmt + education + arts + otherservice + publicadmin + 
-  #                       military,
-  #                     data = warn_ols,
-  #                     index = c("county", "year"), 
-  #                     model = "within")
+
   warn_reg <- lm(ln_layoff ~ 1 + ln_pop + male_share + colshare + hsshare + empshare + 
                    agriculture + construction + manufacturing + wholesaletrade + transportation + 
                    utilities + information + finance + sciencemgmt + education + arts + otherservice + publicadmin + 
@@ -83,9 +78,11 @@ modeler <- function(seed = sample(1:1000, 1)) {
   # Create dummy for each county
   for(i in unique(warn_rf$county)) {
     warn_rf <- warn_rf %>%
-      mutate(!!str_replace_all(string = i, pattern = " ", replacement = "") := as.numeric(county == i))
+      dplyr::mutate(!!stringr::str_replace_all(string = i, pattern = " ", replacement = "") 
+                    := as.numeric(county == i))
   }
-  warn_rf <- warn_rf %>% filter(is.na(colshare) == FALSE)
+  warn_rf <- warn_rf %>% 
+    dplyr::filter(is.na(colshare) == FALSE)
   
   # For replication, set seed
   if(is.numeric(seed) == FALSE) {
@@ -99,12 +96,12 @@ modeler <- function(seed = sample(1:1000, 1)) {
                     size = floor(0.6 * dim(warn_rf)[1]),
                     replace = FALSE)
   train_df <- warn_rf %>%
-    slice(n_train) %>%
-    select(-c(ln_layoff, ln_pop, county))
+    dplyr::slice(n_train) %>%
+    dplyr::select(-c(ln_layoff, ln_pop, county))
     # mutate(county = factor(county))
   test_df <- warn_rf %>%
-    slice(-n_train) %>%
-    select(-c(ln_layoff, ln_pop, county))
+    dplyr::slice(-n_train) %>%
+    dplyr::select(-c(ln_layoff, ln_pop, county))
     # mutate(county = factor(county))
   rfor <- randomForest::randomForest(n_layoffs ~ ., 
                                      data = train_df,
@@ -114,25 +111,25 @@ modeler <- function(seed = sample(1:1000, 1)) {
   out <- list(OLS = warn_reg,
               `Random Forest` = rfor)
   to_predict_ols <- warn_ols %>% 
-    filter(year == 2018) %>%
-    mutate(year = year + 1) # %>% ANY SENSITIVITIES
+    dplyr::filter(year == 2018) %>%
+    dplyr::mutate(year = year + 1)
   to_predict_rf <- warn_rf %>% 
-    filter(year == 2018) %>%
-    mutate(year = year + 1) 
-  predicted_data <- bind_rows(warn_ols %>% 
-                                select(year, county, n_layoffs) %>%
-                                mutate(type = "Actual"),
+    dplyr::filter(year == 2018) %>%
+    dplyr::mutate(year = year + 1) 
+  predicted_data <- dplyr::bind_rows(warn_ols %>% 
+                                       dplyr::select(year, county, n_layoffs) %>%
+                                       dplyr::mutate(type = "Actual"),
                               to_predict_ols %>% 
-                                select(year, county) %>%
-                                mutate(n_layoffs = predict(out[["OLS"]], to_predict_ols)) %>%
-                                mutate(type = "OLS"),
+                                dplyr::select(year, county) %>%
+                                dplyr::mutate(n_layoffs = predict(out[["OLS"]], to_predict_ols)) %>%
+                                dplyr::mutate(type = "OLS"),
                               to_predict_rf %>% 
-                                select(year, county) %>%
-                                mutate(n_layoffs = predict(out[["Random Forest"]], to_predict_rf)) %>%
-                                mutate(type = "Random Forest"))
+                                dplyr::select(year, county) %>%
+                                dplyr::mutate(n_layoffs = predict(out[["Random Forest"]], to_predict_rf)) %>%
+                                dplyr::mutate(type = "Random Forest"))
                               
   
   # NTD - DELETE
   saveRDS(predicted_data, "./data/predicted_data.RDS")
-  saveRDS(out, "./data/estimation.RDS")
+  saveRDS(out, "./data/estimation-TODELETE.RDS")
 }

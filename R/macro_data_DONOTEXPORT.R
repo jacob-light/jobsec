@@ -75,6 +75,51 @@ macro_data_DONOTEXPORT <- function() {
                  filter(State == "California")) %>%
     mutate(COUNTY = paste(County, "County")) %>% 
     select(-c("County cod", State, STATEICP, STATEFIPS, County))
+  colnames(macro_out) -> temp
+  
+  # Merge in population data to impute ACS characteristics
+  macro_out <- dplyr::right_join(macro_out,
+                               pop %>% 
+                                 dplyr::select(-c(SUMLEV, STATE, COUNTY, STNAME, AGEGRP)) %>% 
+                                 dplyr::rename(COUNTY = CTYNAME),
+                               by = c("YEAR", "COUNTY")) %>% 
+    dplyr::select(COUNTY, YEAR, everything()) %>%
+    dplyr::select(!!temp) %>%
+    dplyr::rename(county = COUNTY, year = YEAR)
+    
+  
+  # Bring in map data for centroids of county
+  library(ggplot2)
+  library(maptools)
+  counties <- map_data("county") %>% 
+    filter(region == "california") %>%
+    rename(county = subregion) %>%
+    mutate(county = paste(str_to_title(county), "County", sep = " "))
+  counties2 <- aggregate(cbind(long, lat) ~ county, data = counties, 
+                         FUN=function(x)mean(range(x)))
+
+  
+  # Separate into counties with more, less than 100,000 residents (+ Monterey)
+  counties_tomatch <- unique(macro_out %>% filter(is.na(colshare)) %>% select(county)) %>%
+    left_join(counties2, by = "county")
+  counties_formatch <- unique(macro_out %>% filter(is.na(colshare) == FALSE) %>% select(county)) %>%
+    left_join(counties2, by = "county")
+  
+  nearest_neighbor <- function(i, df, ref) {
+    test <- df[i, ]
+    pair <- ref %>%
+      mutate(dist = (test$long - long) ^ 2 + (test$lat - lat) ^ 2) %>%
+      filter(dist == min(dist))
+    out <- tibble(county = test$county, match = pair$county)
+    return(out)
+  }
+  neighbors <- lapply(1:dim(counties_tomatch)[1], nearest_neighbor, counties_tomatch, counties_formatch) %>%
+    bind_rows()
+  macro_out <- bind_rows(macro_out %>% filter(is.na(colshare) == FALSE),
+                            inner_join(macro_out,
+                                       neighbors %>% rename(co = county, county = match)) %>% 
+                              select(-county) %>% rename(county = co)) %>%
+    select(year, county, everything())
   
   # Save data
   saveRDS(macro_out, file = "C:/Users/jligh/Documents/git/warn/jobsec/data/acs_data.RDS")
