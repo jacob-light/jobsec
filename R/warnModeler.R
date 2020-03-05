@@ -4,11 +4,11 @@
 #' then estimates county level layoffs using lagged macro characteristics.
 #' Returns output from OLS regression and regression tree
 #'
-#' @param 
+#' @param seed is a seed value to ensure replicability
 #'
-#' @export [[NTD]]
+#' @export warnModeler
 #'
-#' @importFrom stringr str_replace_all   [[NTD]]
+#' @importFrom stringr str_replace_all
 #' @importFrom dplyr right_join select rename mutate group_by summarize ungroup slice bind_rows if_else
 #' @importFrom magrittr %>%
 #' @importFrom randomForest randomForest
@@ -16,16 +16,16 @@
 #' @importFrom lubridate year month
 #' 
 #' @examples 
-#'    [[NTD]]
+#'    # Replicate warnPrediction dataset provided in package
+#'    warnPrediction <- warnModeler(25)
 #'
-#' @keywords [[NTD]]
-modeler <- function(seed = sample(1:1000, 1)) {
+warnModeler <- function(seed = sample(1:1000, 1)) {
   # Load from data files: 1) Archived warn data, FY2014-18
   #                       2) Annual population at the county level
   #                       3) Macro fundamentals from the ACS, covering 2014-18
   macro_out <- readRDS("./data/acs_data.RDS")
   pop <- readRDS("./data/pop.RDS")
-  warn <- readRDS("./data/warns_archive.RDS")
+  warn <- readRDS("./data/warnSample.RDS")
   
   # Merge ACS and population data. Intermediate data frame will be unique at the
   # county-year level
@@ -130,6 +130,5 @@ modeler <- function(seed = sample(1:1000, 1)) {
                               
   
   # NTD - DELETE
-  saveRDS(predicted_data, "./data/predicted_data.RDS")
-  saveRDS(out, "./data/estimation-TODELETE.RDS")
+  return(predicted_data)
 }

@@ -1,29 +1,24 @@
 #' Scrape WARN notice data
 #'
-#' @description Extracter converts a WARN table in PDF format to a data frame.
+#' @description warnReader converts a WARN table in PDF format to a data frame.
 #' Accepts as argument url = the url location of the target WARN table.
 #'
 #' @param url is the location of a WARN PDF table
 #'
-#' @export
+#' @export warnReader
 #'
 #' @importFrom stringr str_replace_all
 #' @importFrom dplyr filter mutate bind_rows
 #' @importFrom magrittr %>%
 #' @importFrom lubridate mdy
 #' @importFrom tabulizer extract_tables
-#' 
-#' @examples 
-#'    [[NTD]]
 #'
-#' @keywords [[NTD]]
-#'
-extracter <- function(url) {
+warnReader <- function(url) {
   # Extract table from web URL
   out <- tabulizer::extract_tables(url)
   
   # Take list output from extract_tables, reformat as single tibble
-  out <- lapply(out, namer) %>% 
+  out <- lapply(out, warnNamer) %>% 
     dplyr::bind_rows()
   
   # Data cleaning - filter errant rows

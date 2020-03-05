@@ -1,26 +1,29 @@
-#' Calls extracter function, scrapes WARN notice data
+#' Calls warnReader function, scrapes WARN notice data
 #'
-#' @description Extracter converts a WARN table in PDF format to a data frame.
-#' Accepts as argument url = the url location of the target WARN table.
+#' @description warnDownload converts a WARN table in PDF format to a data frame.
 #'
 #' @param year is an integer vector containing the fiscal years for which the function
 #' will pull WARN reports. The default is to pull the current year report. The
 #' fiscal year begins on July 1 of the specified year and ends on June 30 of the 
 #' following year. Fiscal years are integers ranging from 2014 to 2019.
 #'
-#' @export
+#' @export warnDownload
 #'
 #' @importFrom xml2 xml_find_all xml_attrs
-#' @importFrom stringr str_subset
+#' @importFrom stringr str_subset str_detect
 #' @importFrom purrr map reduce
-#' @importFrom dplyr filter mutate select left_join
+#' @importFrom dplyr filter mutate select left_join bind_rows if_else contains everything
 #' @importFrom magrittr %>%
 #' 
 #' @examples 
-#'    [[NTD]]
-#'
+#'    # Download WARN files for current year
+#'    warn_current <- warnDownload(2019)
+#'    
+#'    # Replicate the warnSample dataset provided in the package
+#'    warn_sample <- warnDownload(2014:2018)
+#'    
 #' @keywords [[NTD]]
-warn_dl <- function(year = NULL) {
+warnDownload <- function(year = NULL) {
   # Location of California EDD database:
   loc <- "https://www.edd.ca.gov/Jobs_and_Training/Layoff_Services_WARN.htm"
   
@@ -53,20 +56,20 @@ warn_dl <- function(year = NULL) {
     year <- 2019
   }
   
-  # Apply extracter function to the links constructed above, subset to
+  # Apply warnReader function to the links constructed above, subset to
   # date range specified in function arguments
   dates <- paste0("7-1-", year)
-  to_scrape <- warns[purrr::map(dates, .f = str_detect, string = warns) %>% purrr::reduce(`|`)]
+  to_scrape <- warns[purrr::map(dates, .f = stringr::str_detect, string = warns) %>% purrr::reduce(`|`)]
   
-  # Scrape using extracter function
-  out <- lapply(to_scrape, extracter) %>% 
-    bind_rows()
+  # Scrape using warnReader function
+  out <- lapply(to_scrape, warnReader) %>% 
+    dplyr::bind_rows()
   
   # Standardize county names
   out <- out %>% 
     dplyr::select(-county) %>%
     dplyr::left_join(readRDS("./data/city_to_county.RDS"), by = "city") %>%
-    dplyr::mutate(county = if_else(is.na(county), "missing", county)) %>%
-    dplyr::select(contains("date"), company, city, county, everything())
+    dplyr::mutate(county = dplyr::if_else(is.na(county), "missing", county)) %>%
+    dplyr::select(dplyr::contains("date"), company, city, county, dplyr::everything())
   return(out)
 }

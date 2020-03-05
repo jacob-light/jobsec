@@ -1,19 +1,14 @@
 #' Clean WARN data
 #'
 #' @description CA WARN data tables are published in inconsistent format. The
-#' namer function identifies the format of the WARN table and
+#' warnNamer function identifies the format of the WARN table and
 #' names the columns appropriately.
 #'
 #' @param d is a list object containing scraped WARN pdf
 #'
-#' @export
-#' 
-#' @examples 
-#'    [[NTD]]
+#' @export warnNamer
 #'
-#' @keywords [[NTD]]
-#'
-namer <- function(d) {
+warnNamer <- function(d) {
   d <- as.data.frame(d, stringsAsFactors = FALSE)
   
   # Check table width

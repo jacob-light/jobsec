@@ -1,6 +1,6 @@
 #' County-level population data
 #'
-#' Output of dl_pop() function, contains processed county-year-level population
+#' Contains processed county-year-level population
 #' estimates downloaded from the Census.
 #'
 #' @name bitly
