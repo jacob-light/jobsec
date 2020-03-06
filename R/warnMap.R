@@ -13,19 +13,12 @@
 #' warnMap(df)
 #' @export warnMap
 warnMap <- function(data){
-  #get locatity: coty or county
-  local <- base::names(data[2])
-  
-  #check for counties only.
-  if(local == "city"){
-    stop("Mapping only works with counties, not cities.")
-  }
-  
+
   #summarize data data
   plot_data <- data %>%
-    dplyr::group_by(!!base::as.name(local)) %>%
+    dplyr::group_by(county) %>%
     dplyr::summarize(layoffs = base::sum(n_employees)) %>%
-    dplyr::mutate(!!local := base::tolower(!!base::as.name(local)))
+    dplyr::mutate(county = base::tolower(county))
   
   #clean county list
   plot_data$county <- stringr::str_replace(plot_data$county ,pattern = " county", replace= "")
@@ -34,7 +27,7 @@ warnMap <- function(data){
   county_map <- ggplot2::map_data("county", "california") %>%
     dplyr::rename(county = subregion)
   
-  #mer data with 
+  #merge data with plot data
   merge_data <- dplyr::left_join(county_map, plot_data , by = "county")
   
   #calculate locations for map names
@@ -48,7 +41,7 @@ warnMap <- function(data){
     ggplot2::coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
     ggplot2::labs(fill = NULL,
          caption = base::paste("Source: CA WARN Data"),
-         title = base::paste ("CA WARN Events by", stringr::str_to_title(local),data[1,1], "-",data[base::nrow(data),1] )) +
+         title = base::paste ("CA WARN Events by County", min(data[[1]]), "-", max(data[[1]]) )) +
     ggplot2::geom_text(ggplot2::aes(label = county), data = counties_map_names,  size = 3, hjust = 0.5, color = "white", fontface = "bold")+
     ggplot2::theme(panel.background = ggplot2::element_rect(fill = "darkgray"))
   

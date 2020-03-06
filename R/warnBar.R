@@ -18,8 +18,7 @@ warnBar <- function(data,
   #check user imputs
   by <- base::match.arg(by)
   
-  #get local name: city or county for plotting
-  local <- base::names(data[2])
+
   
   if(by == "rollup")
     bar_plot <- ggplot2::ggplot(data, ggplot2::aes(x=effective_date, y=n_employees)) + 
@@ -29,7 +28,7 @@ warnBar <- function(data,
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))+
     ggplot2::labs(fill = NULL,
          caption = base::paste("Source: CA WARN Data"),
-         title = base::paste ("CA WARN Events by", stringr::str_to_title(local), data[1,1], "-",data[nrow(data),1] ))
+         title = base::paste ("CA WARN Events by County", min(data[[1]]), "-", max(data[[1]]) ))
   
   if(by == "reason")
     bar_plot <- ggplot2::ggplot(data, ggplot2::aes(x=effective_date, y=n_employees, fill = layoff_reason)) + 
@@ -38,16 +37,16 @@ warnBar <- function(data,
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))+
     ggplot2::labs(x = "", fill = "Layoff Reason",
          caption = base::paste("Source: CA WARN Data"),
-         title = base::paste ("CA WARN Events by", stringr::str_to_title(local), data[1,1], "-",data[nrow(data),1] ))
+         title = base::paste ("CA WARN Events by County", min(data[[1]]), "-", max(data[[1]]) ))
   
   if(by == "locality")
-    bar_plot <- ggplot2::ggplot(data, ggplot2::aes(x=effective_date, y=n_employees ,fill = get(local))) + 
+    bar_plot <- ggplot2::ggplot(data, ggplot2::aes(x=effective_date, y=n_employees ,fill = county )) + 
     ggplot2::geom_bar(stat = "identity" , position="dodge") +
     ggplot2::ylab("Layoffs")+
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))+
     ggplot2::labs(x = "", fill = "Region",
          caption = base::paste("Source: CA WARN Data"),
-         title = base::paste ("CA WARN Events by", stringr::str_to_title(local), data[1,1], "-",data[nrow(data),1] ))
+         title = base::paste ("CA WARN Events by County", min(data[[1]]), "-", max(data[[1]]) ))
 
   return(bar_plot)
 }
