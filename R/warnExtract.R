@@ -26,7 +26,7 @@ warnExtract <- function(start_date = -Inf ,
                         counties = NA){
   
   #create main date set
-  df_ca_warn_mod <- df_ca_warn
+  df_ca_warn_mod <- warnSample
   
   #Check user inputs for errors
   type_date <- base::match.arg(type_date)

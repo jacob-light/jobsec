@@ -18,35 +18,36 @@ warnBar <- function(data,
   #check user imputs
   by <- base::match.arg(by)
   
-
-  
   if(by == "rollup")
+    #plot
     bar_plot <- ggplot2::ggplot(data, ggplot2::aes(x=effective_date, y=n_employees)) + 
     ggplot2::geom_bar(stat = "identity", fill = "steelblue")+
     ggplot2::xlab("")+
-    ggplot2::ylab("Employees")+
-    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))+
-    ggplot2::labs(fill = NULL,
-         caption = base::paste("Source: CA WARN Data"),
-         title = base::paste ("CA WARN Events by County", min(data[[1]]), "-", max(data[[1]]) ))
+    ggplot2::ylab("Employees")
   
   if(by == "reason")
+    #plot
     bar_plot <- ggplot2::ggplot(data, ggplot2::aes(x=effective_date, y=n_employees, fill = layoff_reason)) + 
     ggplot2::geom_bar(stat = "identity", position="stack")+
-    ggplot2::ylab("Employees")+
-    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))+
-    ggplot2::labs(x = "", fill = "Layoff Reason",
-         caption = base::paste("Source: CA WARN Data"),
-         title = base::paste ("CA WARN Events by County", min(data[[1]]), "-", max(data[[1]]) ))
-  
-  if(by == "locality")
+    ggplot2::ylab("Employees")
+
+  if(by == "locality"){
+    #check for number of counties and warn if to many.
+    if(length(unique(data$county)) > 5){
+      warning("Recommended selecting  <= 5 counties for graph legibility.")
+    }
+    #plot
     bar_plot <- ggplot2::ggplot(data, ggplot2::aes(x=effective_date, y=n_employees ,fill = county )) + 
     ggplot2::geom_bar(stat = "identity" , position="dodge") +
-    ggplot2::ylab("Layoffs")+
+    ggplot2::ylab("Layoffs")
+  }
+
+    #Add additional details and titles to plots
+  bar_plot <- bar_plot+
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))+
     ggplot2::labs(x = "", fill = "Region",
-         caption = base::paste("Source: CA WARN Data"),
-         title = base::paste ("CA WARN Events by County", min(data[[1]]), "-", max(data[[1]]) ))
-
+                  caption = base::paste("Source: CA WARN Data"),
+                  title = base::paste ("CA WARN Events by County", min(data[[1]]), "-", max(data[[1]]) ))
+  
   return(bar_plot)
 }
