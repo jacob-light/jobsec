@@ -8,7 +8,7 @@
 #' @importFrom magrittr %>%
 #' @examples
 #' #extract warn data
-#' df<- warnExtract(by = "county")
+#' df<- warnExtract(start_date = "2018-01-01", end_date = "2019-01-01")
 #' #plot maps
 #' warnMap(df)
 #' @export warnMap

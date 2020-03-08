@@ -8,7 +8,7 @@
 #' @importFrom magrittr %>%
 #' @examples
 #' #extract warn data
-#' df<- warnExtract(start_date = "2018-01-01", end_date = "2018-08-01")
+#' df<- warnExtractstart_date = "2018-01-01", end_date = "2019-01-01")
 #' #bar plots
 #' warnBar(df, by = "reason")
 #' @export warnBar
@@ -18,26 +18,39 @@ warnBar <- function(data,
   #check user imputs
   by <- base::match.arg(by)
   
+  #get first column date name
+  date <- names(data[1])
+  
+  #plot by rollup
   if(by == "rollup")
     #plot
-    bar_plot <- ggplot2::ggplot(data, ggplot2::aes(x=effective_date, y=n_employees)) + 
+    bar_plot <- ggplot2::ggplot(data, ggplot2::aes(x=get(date), y=n_employees)) + 
     ggplot2::geom_bar(stat = "identity", fill = "steelblue")+
     ggplot2::xlab("")+
     ggplot2::ylab("Employees")
   
-  if(by == "reason")
-    #plot
-    bar_plot <- ggplot2::ggplot(data, ggplot2::aes(x=effective_date, y=n_employees, fill = layoff_reason)) + 
-    ggplot2::geom_bar(stat = "identity", position="stack")+
-    ggplot2::ylab("Employees")
+  #plot by layoff reason.
+  if(by == "reason"){
+    #check for layoff reason in data
+    if("layoff_reason" %in% colnames(data)){
+      #plot
+      bar_plot <- ggplot2::ggplot(data, ggplot2::aes(x=get(date), y=n_employees, fill = layoff_reason)) + 
+      ggplot2::geom_bar(stat = "identity", position="stack")+
+      ggplot2::ylab("Employees")
+    }
+    else{
+      stop("'layoff_reason' not found in data set. Use another warnBar method.")
+    }
+  }
 
+  #plot by locality
   if(by == "locality"){
     #check for number of counties and warn if to many.
     if(length(unique(data$county)) > 5){
       warning("Recommended selecting  <= 5 counties for graph legibility.")
     }
     #plot
-    bar_plot <- ggplot2::ggplot(data, ggplot2::aes(x=effective_date, y=n_employees ,fill = county )) + 
+    bar_plot <- ggplot2::ggplot(data, ggplot2::aes(x=get(date), y=n_employees ,fill = county )) + 
     ggplot2::geom_bar(stat = "identity" , position="dodge") +
     ggplot2::ylab("Layoffs")
   }
