@@ -19,22 +19,36 @@ warnBar <- function(data,
   by <- base::match.arg(by)
   
   #get first column date name
-  date <- names(data[1])
+  date_name <- names(data[1])
   
+  #convert data to character for plotting predictions
+  if("type" %in% colnames(data)){
+    data$year <- as.character(data$year)
+  }
+
   #plot by rollup
-  if(by == "rollup")
-    #plot
-    bar_plot <- ggplot2::ggplot(data, ggplot2::aes(x=get(date), y=n_employees)) + 
-    ggplot2::geom_bar(stat = "identity", fill = "steelblue")+
-    ggplot2::xlab("")+
-    ggplot2::ylab("Employees")
+  if("type" %in% colnames(data)){
+    if(by == "rollup")
+      #plot
+      bar_plot <- ggplot2::ggplot(data, ggplot2::aes(x=get(date_name), y=n_employees, fill = type)) + 
+        ggplot2::geom_bar(stat = "identity")+
+        ggplot2::xlab("")+
+        ggplot2::ylab("Employees")
+  }else{
+    if(by == "rollup")
+      #plot
+      bar_plot <- ggplot2::ggplot(data, ggplot2::aes(x=get(date_name), y=n_employees)) + 
+        ggplot2::geom_bar(stat = "identity", fill = "steelblue")+
+        ggplot2::xlab("")+
+        ggplot2::ylab("Employees")
+  }
   
   #plot by layoff reason.
   if(by == "reason"){
     #check for layoff reason in data
     if("layoff_reason" %in% colnames(data)){
       #plot
-      bar_plot <- ggplot2::ggplot(data, ggplot2::aes(x=get(date), y=n_employees, fill = layoff_reason)) + 
+      bar_plot <- ggplot2::ggplot(data, ggplot2::aes(x=get(date_name), y=n_employees, fill = layoff_reason)) + 
       ggplot2::geom_bar(stat = "identity", position="stack")+
       ggplot2::ylab("Employees")
     }
@@ -50,12 +64,12 @@ warnBar <- function(data,
       warning("Recommended selecting  <= 5 counties for graph legibility.")
     }
     #plot
-    bar_plot <- ggplot2::ggplot(data, ggplot2::aes(x=get(date), y=n_employees ,fill = county )) + 
+    bar_plot <- ggplot2::ggplot(data, ggplot2::aes(x=get(date_name), y=n_employees ,fill = county )) + 
     ggplot2::geom_bar(stat = "identity" , position="dodge") +
     ggplot2::ylab("Layoffs")
   }
 
-    #Add additional details and titles to plots
+  #Add additional details and titles to plots
   bar_plot <- bar_plot+
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))+
     ggplot2::labs(x = "", fill = "Region",
