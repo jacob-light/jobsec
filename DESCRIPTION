@@ -1,0 +1,27 @@
+Package: jobsec
+Type: Package
+Title: Dashboard for California WARN Layoff Data.
+Version: 0.1.0
+Author: Who wrote it
+Maintainer: The package maintainer <yourself@somewhere.net>
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.0.2
+Imports: 
+    dplyr,
+    lubridate,
+    magrittr,
+    purrr,
+    randomForest,
+    stringr,
+    tabulizer,
+    tidyr,
+    xml2,
+    ggplot2
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
