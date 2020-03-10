@@ -23,7 +23,7 @@ warnBar <- function(data,
   
   #convert data to character for plotting predictions
   if("type" %in% colnames(data)){
-    data$year <- as.character(data$year)
+    data$date <- as.character(data$date)
   }
 
   #plot by rollup
