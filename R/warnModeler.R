@@ -4,36 +4,50 @@
 #' then estimates county level layoffs using lagged macro characteristics.
 #' Returns output from OLS regression and regression tree
 #'
+#' @param df is a WARN extract data frame. df must be in the same format
+#' as data downloaded using the warnDownload function and must contain at
+#' least 100 unique county-year observations for reasonable inference
 #' @param seed is a seed value to ensure replicability
 #'
 #' @export warnModeler
 #'
 #' @importFrom stringr str_replace_all
-#' @importFrom dplyr right_join select rename mutate group_by summarize ungroup slice bind_rows if_else
+#' @importFrom dplyr right_join select rename mutate group_by summarize ungroup slice bind_rows if_else mutate_if
 #' @importFrom magrittr %>%
-#' @importFrom randomForest randomForest
 #' @importFrom stats lm
 #' @importFrom lubridate year month
 #' 
 #' @examples 
 #'    # Replicate warnPrediction dataset provided in package
-#'    warnPrediction <- warnModeler(25)
+#'    data(warnSample)
+#'    warnPrediction <- warnModeler(warnSample, 25)
 #'
-warnModeler <- function(seed = sample(1:1000, 1)) {
+warnModeler <- function(df = warnSample, seed = sample(1:1000, 1)) {
   # Load from data files: 1) Archived warn data, FY2014-18
   #                       2) Annual population at the county level
   #                       3) Macro fundamentals from the ACS, covering 2014-18
-  macro_out <- readRDS("./data/acs_data.RDS")
-  pop <- readRDS("./data/pop.RDS")
-  warn <- readRDS("./data/warnSample.RDS")
+  data(acs_data)
+  data(pop)
+  data(warnSample)
+  warn <- warnSample
+  
+  # Confirm that df supplied by user is of correct format and sensible length - require
+  # 100 or more county-year observations to run regression
+  if(colnames(warn) != colnames(df)) {
+    stop("df incorrect format")
+  }
+  if(dim(df %>% select(year, county) %>% unique())[1] < 100) {
+    stop("df contains insufficient county-year variation to run regressions")
+  }
+  warn <- df
   
   # Merge ACS and population data. Intermediate data frame will be unique at the
   # county-year level
   fin_out <- dplyr::right_join(macro_out,
-                        pop %>% 
-                          dplyr::select(-c(SUMLEV, STATE, COUNTY, STNAME, AGEGRP)) %>% 
-                          dplyr::rename(county = CTYNAME, year = YEAR),
-                        by = c("year", "county")) %>% 
+                               pop %>% 
+                                 dplyr::select(-c(SUMLEV, STATE, COUNTY, STNAME, AGEGRP)) %>% 
+                                 dplyr::rename(county = CTYNAME, year = YEAR),
+                               by = c("year", "county")) %>% 
     dplyr::select(county, year, everything())
   
   # NOTE: ACS data are not available for all counties (only available for counties w/
@@ -43,6 +57,14 @@ warnModeler <- function(seed = sample(1:1000, 1)) {
   ###########################
   # 1 - Linear Regression
   ###########################  
+  # Regularize data
+  regularizer <- function(vec) {
+    (vec - min(vec)) / (max(vec) - min(vec))
+  }
+  unregularizer <- function(vec, orig) {
+    vec * (max(orig) - min(orig)) + min(orig)
+  }
+  
   # Standardize year in WARN data - merge to macro fundamentals using the year
   # in which the fiscal year begins (i.e. use 2014 population data for fiscal
   # year July 1, 2014 - June 30, 2015) - effectively regressing on lagged 
@@ -54,81 +76,52 @@ warnModeler <- function(seed = sample(1:1000, 1)) {
     # Collapse WARN records to unique county-year level
     dplyr::group_by(year, county) %>%
     dplyr::summarize(n_layoffs = sum(n_employees)) %>%
+    dplyr::ungroup() %>%
     # Merge on lagged characteristics
     dplyr::right_join(fin_out, by = c("year", "county")) %>%
     # Data processing - create variables for linear regression
     dplyr::mutate(n_layoffs = dplyr::if_else(is.na(n_layoffs), 0, n_layoffs),
-           ln_layoff = log(n_layoffs + 1), # Do a log x + 1 transformation, will undo when projecting
-           ln_pop = log(TOT_POP),
-           male_share =  TOT_MALE / TOT_POP) %>%
-    dplyr::ungroup()
+                  ln_layoff = log(n_layoffs + 1), # Do a log x + 1 transformation, will undo when projecting
+                  ln_pop = log(TOT_POP),
+                  male_share =  TOT_MALE / TOT_POP)
+  # Normalize all numerical variables
+  warn_ols_regular <- warn_ols %>%
+    dplyr::mutate_if(is.numeric, regularizer)
+  # Store year step size as separate value for prediction
+  year_proj <- list(year_max = max(warn_ols$year),
+                    year_step = max(warn_ols$year) - min(warn_ols$year),
+                    year_max_covar = max(fin_out$year))
   
-
+  
   warn_reg <- lm(ln_layoff ~ 1 + ln_pop + male_share + colshare + hsshare + empshare + 
                    agriculture + construction + manufacturing + wholesaletrade + transportation + 
                    utilities + information + finance + sciencemgmt + education + arts + otherservice + publicadmin + 
                    military + year,
-                 data = warn_ols)
+                 data = warn_ols_regular)
   
-  ###########################
-  # 2 - Random Forest
-  ###########################
-  warn_rf <- warn_ols
-  
-  # Create dummy for each county
-  for(i in unique(warn_rf$county)) {
-    warn_rf <- warn_rf %>%
-      dplyr::mutate(!!stringr::str_replace_all(string = i, pattern = " ", replacement = "") 
-                    := as.numeric(county == i))
-  }
-  warn_rf <- warn_rf %>% 
-    dplyr::filter(is.na(colshare) == FALSE)
-  
-  # For replication, set seed
-  if(is.numeric(seed) == FALSE) {
-    warning("Non-numeric seed")
-    seed <- sample(1:1000, 1)
-  }
-  set.seed(seed)  
-  
-  # Build test, train datasets
-  n_train <- sample(x = 1:dim(warn_rf)[1],
-                    size = floor(0.6 * dim(warn_rf)[1]),
-                    replace = FALSE)
-  train_df <- warn_rf %>%
-    dplyr::slice(n_train) %>%
-    dplyr::select(-c(ln_layoff, ln_pop, county))
-    # mutate(county = factor(county))
-  test_df <- warn_rf %>%
-    dplyr::slice(-n_train) %>%
-    dplyr::select(-c(ln_layoff, ln_pop, county))
-    # mutate(county = factor(county))
-  rfor <- randomForest::randomForest(n_layoffs ~ ., 
-                                     data = train_df,
-                                     importance = TRUE)
-  
-  # Prepare output
-  out <- list(OLS = warn_reg,
-              `Random Forest` = rfor)
-  to_predict_ols <- warn_ols %>% 
-    dplyr::filter(year == 2018) %>%
-    dplyr::mutate(year = year + 1)
-  to_predict_rf <- warn_rf %>% 
-    dplyr::filter(year == 2018) %>%
-    dplyr::mutate(year = year + 1) 
+  # Create data to project using OLS model
+  to_predict_ols <- fin_out %>%
+    dplyr::mutate(ln_pop = log(TOT_POP),
+                  male_share =  TOT_MALE / TOT_POP) %>%
+    dplyr::mutate_if(is.numeric, regularizer) %>%
+    # Select most current year's data
+    dplyr::filter(year == 1) %>%
+    # Escalate up to projection year
+    dplyr::mutate(year = year + 
+                    (year_proj[['year_max_covar']] - year_proj[['year_max']] + 1) / 
+                    (year_proj[['year_step']])) 
+
   predicted_data <- dplyr::bind_rows(warn_ols %>% 
                                        dplyr::select(year, county, n_layoffs) %>%
                                        dplyr::mutate(type = "Actual"),
-                              to_predict_ols %>% 
-                                dplyr::select(year, county) %>%
-                                dplyr::mutate(n_layoffs = predict(out[["OLS"]], to_predict_ols)) %>%
-                                dplyr::mutate(type = "OLS"),
-                              to_predict_rf %>% 
-                                dplyr::select(year, county) %>%
-                                dplyr::mutate(n_layoffs = predict(out[["Random Forest"]], to_predict_rf)) %>%
-                                dplyr::mutate(type = "Random Forest"))
-                              
+                                     to_predict_ols %>% 
+                                       dplyr::select(year, county) %>%
+                                       dplyr::mutate(n_layoffs = predict(warn_reg, to_predict_ols)) %>%
+                                       dplyr::mutate(n_layoffs = unregularizer(n_layoffs, warn_ols$ln_layoff)) %>%
+                                       dplyr::mutate(n_layoffs = exp(n_layoffs) - 1) %>%
+                                       dplyr::mutate(type = "OLS") %>%
+                                       dplyr::mutate(year = year_proj[['year_max_covar']] + 1))
   
-  # NTD - DELETE
-  return(predicted_data)
 }
+
+
