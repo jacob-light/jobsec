@@ -39,16 +39,17 @@ The datasets `pop` and `acs_data` provided in the `jobsec` package provide some 
 
 ## Projections
 
-What do prior-year layoff patterns portend for communities under current economic conditions? The `warnModeler` tool is designed to allow policymakers to answer this question under a couple of specifications. `warnModeler` estimates current-year county-level layoffs using prior year layoff observations. The `warnModeler` function runs two models: an OLS model and a random forest.
+What do prior-year layoff patterns portend for communities under current economic conditions? The `warnModeler` tool is designed to allow policymakers to answer this question under a couple of specifications. `warnModeler` estimates current-year county-level layoffs using prior year layoff observations. The `warnModeler` function predicts furture-year regressions using an OLS model.
 
 The OLS model estimates the following model:
 $$y_{c,t} = \alpha + \beta POP_{c,t-1} + \gamma EDUC_{c,t-1} + \delta LFPR_{c,t-1} + \lambda IND_{c,t-1} + \epsilon_{c,t}$$
-where $c$ represents a county, $t$ represents a year, $POP_{c,t-1}$ is a vector of lagged population variables (total population, male share of population), $EDUC_{c,t-1}$ is a vector of lagged education variables (college share, high school share), $LFPR_{c,t-1}$ is the lagged labor force participation rate,and $IND_{c,t-1}$ is a vector of industry shares. The regression estimates total layoffs on lagged demographic characteristics to align the beginning of the California fiscal year with the survey period when ACS data were collected. The random forest fits a non-parametric model on same variables and adds county fixed effects.
+where $c$ represents a county, $t$ represents a year, $POP_{c,t-1}$ is a vector of lagged population variables (total population, male share of population), $EDUC_{c,t-1}$ is a vector of lagged education variables (college share, high school share), $LFPR_{c,t-1}$ is the lagged labor force participation rate,and $IND_{c,t-1}$ is a vector of industry shares. The regression estimates total layoffs on lagged demographic characteristics to align the beginning of the California fiscal year with the survey period when ACS data were collected. 
 
 This function is primarily demonstrative - data limitations prevent this function from realizing its full potential. In particular: 
 
 1. We do not have many observations for each county. Thus, although we have a rich set of controls, incorporating all of the controls limits the precision of the estimation, and limits our ability to train the models. Future iterations of the script would benefit from a longer history of data. We considered running the regression at the monthly level but aggregating to the monthly level yields extremely noisy observations.
 2. Current-year controls are not available, so the projections rely on an assumption that the demographic and population characteristics of each county are identical to the characteristics in the 2018-19 fiscal year. This is probably a reasonable assumption for 2019-20 but limits the ability to project farther beyond 2020.
+3. Given likely nonlinearities in the relationship between number of layoffs and the predictor variables, we would ideally like to implement a more flexible model (like a random forest). However, at this time the data are insufficient to estimate a more flexible model - we believe that this will be possible in future iterations of the jobsec package. 
 
 Sample output from the `warnModeler` function are available in the `warnPrediction` dataset:
 

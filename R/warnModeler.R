@@ -26,10 +26,11 @@ warnModeler <- function(df = warnSample, seed = sample(1:1000, 1)) {
   # Load from data files: 1) Archived warn data, FY2014-18
   #                       2) Annual population at the county level
   #                       3) Macro fundamentals from the ACS, covering 2014-18
-  data(acs_data)
-  data(pop)
-  data(warnSample)
-  warn <- warnSample
+  temp_envir <- new.env()
+  data(acs_data, envir = temp_envir)
+  data(pop, envir = temp_envir)
+  data(warnSample, envir = temp_envir)
+  warn <- temp_envir$warnSample
   
   # Confirm that df supplied by user is of correct format and sensible length - require
   # 100 or more county-year observations to run regression
@@ -43,8 +44,8 @@ warnModeler <- function(df = warnSample, seed = sample(1:1000, 1)) {
   
   # Merge ACS and population data. Intermediate data frame will be unique at the
   # county-year level
-  fin_out <- dplyr::right_join(macro_out,
-                               pop %>% 
+  fin_out <- dplyr::right_join(temp_envir$acs_data,
+                               temp_envir$pop %>% 
                                  dplyr::select(-c(SUMLEV, STATE, COUNTY, STNAME, AGEGRP)) %>% 
                                  dplyr::rename(county = CTYNAME, year = YEAR),
                                by = c("year", "county")) %>% 
@@ -53,6 +54,7 @@ warnModeler <- function(df = warnSample, seed = sample(1:1000, 1)) {
   # NOTE: ACS data are not available for all counties (only available for counties w/
   # population > 100,000). When characteristics data are unavailable, impute
   # characteristics from nearest county with population above 100,000.
+  rm(temp_envir)
   
   ###########################
   # 1 - Linear Regression
@@ -110,7 +112,7 @@ warnModeler <- function(df = warnSample, seed = sample(1:1000, 1)) {
     dplyr::mutate(year = year + 
                     (year_proj[['year_max_covar']] - year_proj[['year_max']] + 1) / 
                     (year_proj[['year_step']])) 
-
+  
   predicted_data <- dplyr::bind_rows(warn_ols %>% 
                                        dplyr::select(year, county, n_layoffs) %>%
                                        dplyr::mutate(type = "Actual"),
