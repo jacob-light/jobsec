@@ -65,11 +65,16 @@ warnDownload <- function(year = NULL) {
   out <- lapply(to_scrape, warnReader) %>% 
     dplyr::bind_rows()
   
+  # Load city-to-county data in temporary environment for merge
+  temp_envir <- new.env()
+  data(city_to_county, envir = temp_envir)
+  
   # Standardize county names
   out <- out %>% 
     dplyr::select(-county) %>%
-    dplyr::left_join(readRDS("./data/city_to_county.RDS"), by = "city") %>%
+    dplyr::left_join(temp_envir$city_to_county, by = "city") %>%
     dplyr::mutate(county = dplyr::if_else(is.na(county), "missing", county)) %>%
     dplyr::select(dplyr::contains("date"), company, city, county, dplyr::everything())
+  rm(temp_envir)
   return(out)
 }

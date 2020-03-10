@@ -113,7 +113,7 @@ warnModeler <- function(df = warnSample, seed = sample(1:1000, 1)) {
                     (year_proj[['year_max_covar']] - year_proj[['year_max']] + 1) / 
                     (year_proj[['year_step']])) 
   
-  predicted_data <- dplyr::bind_rows(warn_ols %>% 
+  warnPredict <- dplyr::bind_rows(warn_ols %>% 
                                        dplyr::select(year, county, n_layoffs) %>%
                                        dplyr::mutate(type = "Actual"),
                                      to_predict_ols %>% 
