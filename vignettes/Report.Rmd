@@ -1,7 +1,10 @@
 ---
 title: "Introduction to jobsec"
-author: "Jacob Light, Jesse Rowlands"
-output: html_document
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to jobsec}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
 ---
 
 ```{r setup, include=FALSE}

@@ -20,7 +20,7 @@
 #'    warn_current <- warnDownload(2019)
 #'    
 #'    # Replicate the warnSample dataset provided in the package
-#'    warn_sample <- warnDownload(2014:2018)
+#'    warnSample <- warnDownload(2014:2018)
 #'    
 #' @keywords [[NTD]]
 warnDownload <- function(year = NULL) {
@@ -74,7 +74,23 @@ warnDownload <- function(year = NULL) {
     dplyr::select(-county) %>%
     dplyr::left_join(temp_envir$city_to_county, by = "city") %>%
     dplyr::mutate(county = dplyr::if_else(is.na(county), "missing", county)) %>%
-    dplyr::select(dplyr::contains("date"), company, city, county, dplyr::everything())
+    dplyr::select(dplyr::contains("date"), company, city, county, dplyr::everything()) %>%
+    # Manually adjust names for compatability with warnMap function
+    dplyr::mutate(county = trimws(county)) %>%
+    dplyr::mutate(county = dplyr::if_else(stringr::str_detect(county, "Francisco"), "San Francisco County", county)) %>%
+    # Manually adjust cities with more than 10 WARN notices that fail to match city-county map
+    dplyr::mutate(county = dplyr::if_else(city == "Chatsworth", "Los Angeles County", county)) %>%
+    dplyr::mutate(county = dplyr::if_else(city == "City of Industry", "Los Angeles County", county)) %>%
+    dplyr::mutate(county = dplyr::if_else(city == "Fort Irwin", "San Bernadino County", county)) %>%
+    dplyr::mutate(county = dplyr::if_else(city == "Huntington", "Orange County", county)) %>%
+    dplyr::mutate(county = dplyr::if_else(city == "Mira Loma", "Riverside County", county)) %>%
+    dplyr::mutate(county = dplyr::if_else(city == "Rancho", "San Bernardino County", county)) %>%
+    dplyr::mutate(county = dplyr::if_else(city == "South San", "San Mateo County", county)) %>%
+    dplyr::mutate(county = dplyr::if_else(city == "Valencia", "Los Angeles County", county)) %>%
+    dplyr::mutate(county = dplyr::if_else(city == "Wilmington", "Los Angeles County", county)) %>%
+    dplyr::mutate(county = dplyr::if_else(city == "Woodland Hills", "Los Angeles County", county)) %>%
+    dplyr::filter(county != "missing")
+  
   rm(temp_envir)
   return(out)
 }

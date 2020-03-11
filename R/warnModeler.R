@@ -7,7 +7,6 @@
 #' @param df is a WARN extract data frame. df must be in the same format
 #' as data downloaded using the warnDownload function and must contain at
 #' least 100 unique county-year observations for reasonable inference
-#' @param seed is a seed value to ensure replicability
 #'
 #' @export warnModeler
 #'
@@ -20,9 +19,9 @@
 #' @examples 
 #'    # Replicate warnPrediction dataset provided in package
 #'    data(warnSample)
-#'    warnPrediction <- warnModeler(warnSample, 25)
+#'    warnPrediction <- warnModeler(warnSample)
 #'
-warnModeler <- function(df = warnSample, seed = sample(1:1000, 1)) {
+warnModeler <- function(df = warnSample) {
   # Load from data files: 1) Archived warn data, FY2014-18
   #                       2) Annual population at the county level
   #                       3) Macro fundamentals from the ACS, covering 2014-18
@@ -34,10 +33,13 @@ warnModeler <- function(df = warnSample, seed = sample(1:1000, 1)) {
   
   # Confirm that df supplied by user is of correct format and sensible length - require
   # 100 or more county-year observations to run regression
-  if(colnames(warn) != colnames(df)) {
+  if(all(colnames(warn) == colnames(df)) == FALSE) {
     stop("df incorrect format")
   }
-  if(dim(df %>% select(year, county) %>% unique())[1] < 100) {
+  if(dim(df %>% 
+         dplyr::mutate(year = lubridate::year(received_date)) %>%
+         dplyr::select(year, county) %>%
+         unique())[1] < 100) {
     stop("df contains insufficient county-year variation to run regressions")
   }
   warn <- df
@@ -113,7 +115,7 @@ warnModeler <- function(df = warnSample, seed = sample(1:1000, 1)) {
                     (year_proj[['year_max_covar']] - year_proj[['year_max']] + 1) / 
                     (year_proj[['year_step']])) 
   
-  warnPredict <- dplyr::bind_rows(warn_ols %>% 
+  warnPrediction <- dplyr::bind_rows(warn_ols %>% 
                                        dplyr::select(year, county, n_layoffs) %>%
                                        dplyr::mutate(type = "Actual"),
                                      to_predict_ols %>% 
