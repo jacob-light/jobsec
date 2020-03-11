@@ -77,8 +77,8 @@ warnExtract <- function(warn_data = warnSample,
   if(start_date != -Inf | end_date != Inf ){
     warn_data <-
       warn_data %>%
-      dplyr::filter(date > start_date) %>%
-      dplyr::filter(date < end_date)
+      dplyr::filter(date >= start_date) %>%
+      dplyr::filter(date <= end_date)
   }
 
   #rollup to month or year
@@ -110,7 +110,7 @@ warnExtract <- function(warn_data = warnSample,
       dplyr::mutate(!!type_date := date) %>%
       dplyr::select(type_date, county, layoff_reason, n_employees) %>%
       dplyr::group_by(!!as.name(type_date), county, layoff_reason) %>%
-      dplyr::summarize(n_employees = sum(n_employees), events = dplyr::n())
+      dplyr::summarize(n_employees = sum(n_employees), n_events = dplyr::n())
   }
   #return data
   return(warn_data)
