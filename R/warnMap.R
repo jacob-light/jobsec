@@ -28,15 +28,15 @@ warnMap <- function(data){
     dplyr::rename(county = subregion)
   
   #merge data with plot data
-  merge_data <- dplyr::left_join(county_map, plot_data , by = "county")
+  map_plot <- dplyr::left_join(county_map, plot_data , by = "county")
   
   #calculate locations for map names
-  counties_map_names <- merge_data %>%
+  counties_map_names <- map_plot %>%
     dplyr::group_by(county, layoffs) %>%
     dplyr::summarise(long = (base::max(long) + base::min(long))/2, lat = (base::max(lat) + base::min(lat))/2)
   
   #plot map with names and layoffs
-  plt <- ggplot2::ggplot(data = merge_data ,mapping = ggplot2::aes(x = long, y = lat, group = county, fill = layoffs)) +
+  plt <- ggplot2::ggplot(data = map_plot ,mapping = ggplot2::aes(x = long, y = lat, group = county, fill = layoffs)) +
     ggplot2::geom_polygon(color = "gray90", size = 0.1) +
     ggplot2::coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
     ggplot2::labs(fill = NULL,
