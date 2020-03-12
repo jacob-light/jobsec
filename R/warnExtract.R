@@ -1,7 +1,7 @@
 #' Data extractor for summarizing WARN data.
 #' 
 #' @description Creates a filtered data set from WARN data to use in plotting functions or as a data table.
-#' @warn_data a WARN data set. uses historical data as default. can also provide data set from \link[jobsec]{warnDownload} or\link[jobsec]{warnModeler}..
+#' @param warn_data a WARN data set. uses historical data as default. can also provide data set from \link[jobsec]{warnDownload} or\link[jobsec]{warnModeler}..
 #' @param start_date a start date.
 #' @param end_date an end date.
 #' @param type_date a string specifying layoff reason.
