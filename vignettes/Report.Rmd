@@ -130,3 +130,8 @@ df <- warnExtract(start_date = "2017-01-01", end_date = "2017-12-31")
 #plot
 warnMap(df)
 ```
+
+## Project Contributions
+
+Jacob Light: Functions for Data sources, web scraping, and projections. Documentation.
+Jesse Rowlands: Functions for data processing and visualizations. Documentation.
