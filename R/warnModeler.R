@@ -13,8 +13,9 @@
 #' @importFrom stringr str_replace_all
 #' @importFrom dplyr right_join select rename mutate group_by summarize ungroup slice bind_rows if_else mutate_if
 #' @importFrom magrittr %>%
-#' @importFrom stats lm
 #' @importFrom lubridate year month
+#' @importFrom stats lm predict
+#' @importFrom utils data
 #' 
 #' @examples 
 #'    # Replicate warnPrediction dataset provided in package
@@ -26,9 +27,9 @@ warnModeler <- function(df = warnSample) {
   #                       2) Annual population at the county level
   #                       3) Macro fundamentals from the ACS, covering 2014-18
   temp_envir <- new.env()
-  data(acs_data, envir = temp_envir)
-  data(pop, envir = temp_envir)
-  data(warnSample, envir = temp_envir)
+  utils::data(acs_data, envir = temp_envir)
+  utils::data(pop, envir = temp_envir)
+  utils::data(warnSample, envir = temp_envir)
   warn <- temp_envir$warnSample
   
   # Confirm that df supplied by user is of correct format and sensible length - require
@@ -97,7 +98,7 @@ warnModeler <- function(df = warnSample) {
                     year_max_covar = max(fin_out$year))
   
   
-  warn_reg <- lm(ln_layoff ~ 1 + ln_pop + male_share + colshare + hsshare + empshare + 
+  warn_reg <- stats::lm(ln_layoff ~ 1 + ln_pop + male_share + colshare + hsshare + empshare + 
                    agriculture + construction + manufacturing + wholesaletrade + transportation + 
                    utilities + information + finance + sciencemgmt + education + arts + otherservice + publicadmin + 
                    military + year,
@@ -120,7 +121,7 @@ warnModeler <- function(df = warnSample) {
                                        dplyr::mutate(type = "Actual"),
                                      to_predict_ols %>% 
                                        dplyr::select(year, county) %>%
-                                       dplyr::mutate(n_layoffs = predict(warn_reg, to_predict_ols)) %>%
+                                       dplyr::mutate(n_layoffs = stats::predict(warn_reg, to_predict_ols)) %>%
                                        dplyr::mutate(n_layoffs = unregularizer(n_layoffs, warn_ols$ln_layoff)) %>%
                                        dplyr::mutate(n_layoffs = exp(n_layoffs) - 1) %>%
                                        dplyr::mutate(type = "OLS") %>%

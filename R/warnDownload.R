@@ -14,6 +14,7 @@
 #' @importFrom purrr map reduce
 #' @importFrom dplyr filter mutate select left_join bind_rows if_else contains everything
 #' @importFrom magrittr %>%
+#' @importFrom utils data
 #' 
 #' @examples 
 #'    # Download WARN files for current year
@@ -22,7 +23,6 @@
 #'    # Replicate the warnSample dataset provided in the package
 #'    warnSample <- warnDownload(2014:2018)
 #'    
-#' @keywords [[NTD]]
 warnDownload <- function(year = NULL) {
   # Location of California EDD database:
   loc <- "https://www.edd.ca.gov/Jobs_and_Training/Layoff_Services_WARN.htm"
@@ -67,7 +67,7 @@ warnDownload <- function(year = NULL) {
   
   # Load city-to-county data in temporary environment for merge
   temp_envir <- new.env()
-  data(city_to_county, envir = temp_envir)
+  utils::data(city_to_county, envir = temp_envir)
   
   # Standardize county names
   out2 <- out %>%
