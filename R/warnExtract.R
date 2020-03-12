@@ -9,7 +9,7 @@
 #' @param layoff_type a string specifying what layoff types to filter for.
 #' @param counties a character vector of counties to filter for.
 #' @importFrom stringr str_replace
-#' @importFrom dplyr filter
+#' @importFrom dplyr filter rename
 #' @importFrom tidyr pivot_longer
 #' @importFrom magrittr %>%
 #' @return a data frame of summarized WARN data based on user filtered inputs.
@@ -69,8 +69,8 @@ warnExtract <- function(warn_data = warnSample,
   #reformat prediction data if used
   if("type" %in% colnames(warn_data)){
     warn_data <- warn_data %>%
-      rename(date = year) %>%
-      rename(n_employees = n_layoffs)
+      dplyr::rename(date = year) %>%
+      dplyr::rename(n_employees = n_layoffs)
   }
 
   #filter dates if user submits data range

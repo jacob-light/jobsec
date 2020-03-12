@@ -8,6 +8,7 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
+library(magrittr)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -109,7 +110,7 @@ warnBar takes output from `jobsec::warnExtract` and can plots 3 types of Bar Cha
 
 #### warnBar Example
 
-```{r warnBar_example}
+```{r warnBar_example, fig.height = 5, fig.width = 5, fig.align = "center"}
 #Use warnExtract to prep data
 df <- warnExtract(start_date = "2015-01-01", end_date = "2018-12-31", rollup = "year",counties = c("Alameda County", "Fresno County"))
 
@@ -123,7 +124,7 @@ warnBar(df, by = "locality")
 
 #### warnMap Example
 
-```{r warnMap_example}
+```{r warnMap_example, fig.height = 7, fig.width = 7, fig.align = "center"}
 #Use warnExtract to prep data
 df <- warnExtract(start_date = "2017-01-01", end_date = "2017-12-31")
 
@@ -134,4 +135,5 @@ warnMap(df)
 ## Project Contributions
 
 Jacob Light: Functions for Data sources, web scraping, and projections. Documentation.
+
 Jesse Rowlands: Functions for data processing and visualizations. Documentation.
