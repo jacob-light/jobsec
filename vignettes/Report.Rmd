@@ -55,7 +55,7 @@ This function is primarily demonstrative - data limitations prevent this functio
 Sample output from the `warnModeler` function are available in the `warnPrediction` dataset:
 
 ```{r warn_model, echo = FALSE}
-  tail(warnPredict)
+  tail(warnPrediction)
 ```
 
 ## Data Filtering
@@ -89,7 +89,7 @@ head(df)
 WARN predictions for 2019 for 'Alameda County' and 'Fresno County'.
 
 ```{r warnExtract_example_2}
-df <- warnExtract(warn_data = warnPredict, start_date = "2018-31-01", end_date = "2019-12-31",counties = c("Alameda County", "Fresno County"))
+df <- warnExtract(warn_data = warnPrediction, start_date = "2018-31-01", end_date = "2019-12-31",counties = c("Alameda County", "Fresno County"))
 df
 ```
 
