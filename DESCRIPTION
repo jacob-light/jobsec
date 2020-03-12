@@ -1,6 +1,6 @@
 Package: jobsec
 Type: Package
-Title: Dashboard for California WARN Layoff Data.
+Title: Dashboard for California WARN Layoff Data
 Version: 0.1.0
 Author: Jacob Light, Jesse Rowlands
 Maintainer: Jacob Light <jdlight@stanford.edu>
@@ -19,7 +19,9 @@ Imports:
     tabulizer,
     tidyr,
     xml2,
-    ggplot2
+    ggplot2,
+    maps,
+    mapproj
 Suggests: 
     knitr,
     rmarkdown
