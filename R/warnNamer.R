@@ -3,6 +3,9 @@
 #' @description CA WARN data tables are published in inconsistent format. The
 #' warnNamer function identifies the format of the WARN table and
 #' names the columns appropriately.
+#' 
+#' @importFrom dplyr select
+#' @importFrom magrittr %>%
 #'
 #' @param d is a list object containing scraped WARN pdf
 #'
@@ -23,7 +26,7 @@ warnNamer <- function(d) {
     headers <- c("notice_date", "effective_date", "received_date", "company",
                  "city", "county", "n_employees", "layoff_reason") 
     colnames(d) <- headers
-    return(d)
+    return(d %>% dplyr::select(-county))
   } else {
     return(NULL)
   }

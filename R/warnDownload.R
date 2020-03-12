@@ -70,8 +70,7 @@ warnDownload <- function(year = NULL) {
   data(city_to_county, envir = temp_envir)
   
   # Standardize county names
-  out <- out %>% 
-    dplyr::select(-county) %>%
+  out2 <- out %>%
     dplyr::left_join(temp_envir$city_to_county, by = "city") %>%
     dplyr::mutate(county = dplyr::if_else(is.na(county), "missing", county)) %>%
     dplyr::select(dplyr::contains("date"), company, city, county, dplyr::everything()) %>%
