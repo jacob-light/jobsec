@@ -287,6 +287,7 @@ WARN predictions for 2019 for 'Alameda County' and 'Fresno County'.
 </tbody>
 </table>
 </p>
+
 ## Data Visualization
 
 Two functions provide visualizations for the WARN data: `jobsec::warnBar` and `jobsec::warnMap`.
