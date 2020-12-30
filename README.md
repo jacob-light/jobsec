@@ -1,16 +1,9 @@
----
-title: "Introduction to jobsec"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Introduction to jobsec}
-  %\VignetteEngine{knitr::rmarkdown}
-  \usepackage[utf8]{inputenc}
----
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{geometry}
+\usepackage{graphicx}
 
-```{r setup, include=FALSE}
-library(magrittr)
-knitr::opts_chunk$set(echo = TRUE)
-```
+### Introduction to jobsec
 
 ## California WARN Database
 
@@ -26,12 +19,6 @@ This document introduces users to jobsec's basic tools, including the various da
 ## WARN Reports
 
 The primary purpose of jobsec is to scrape the California EDD website to download and process up-to-date current-year WARN data. Users can download WARN reports tables for any fiscal year (or combination of fiscal year) using the function `jobsec::warnDownload`. The dataset `warnSample` provides archived data for fiscal years 2014-2018. A sample of the WARN data format is provided below:
-
-```{r sample_demo, include = FALSE}
-  library(jobsec)
-  dim(warnSample)
-  head(warnSample)
-```
 
 ## Supplementary Data Sources
 
@@ -55,10 +42,6 @@ This function is primarily demonstrative - data limitations prevent this functio
 
 Sample output from the `warnModeler` function are available in the `warnPrediction` dataset:
 
-```{r warn_model, echo = FALSE}
-  tail(warnPrediction)
-```
-
 ## Data Filtering
 
 The WARN data set does not come in an easily plottable form. Observations include multiple ‘dates’ and ‘layoff reasons’.  `jobsec::warnExtract` function provide multiple ways to clean and filter the WARN data set for analysis or plotting. Various filters include:
@@ -75,25 +58,6 @@ The WARN data set does not come in an easily plottable form. Observations includ
   -	jobsec::warnPrecict: 2014-2018 WARN data set  with 2019-20 predictions include with the package
   -	Output from `jobsec::warnDownload` of scraped warn data from 
   -	Output from `jobsec::warnModeler` of predicted warn data
-  
-#### warnExtract Example 1: Using package data warnSample
-
-WARN from ‘2017-01-01’ through ‘2018-01-01’, rolled up by ‘year’, and by ‘received_date’.
-
-```{r warnExtract_example_1}
-df <- warnExtract(start_date = "2018-01-01", end_date = "2018-08-01", rollup = "year" ,  type_date = "received_date")
-head(df)
-```
-
-#### warnExtract Example 2: Using package predicted data warnPredict
-
-WARN predictions for 2019 for 'Alameda County' and 'Fresno County'.
-
-```{r warnExtract_example_2}
-df <- warnExtract(warn_data = warnPrediction, start_date = "2018-31-01", end_date = "2019-12-31",counties = c("Alameda County", "Fresno County"))
-df
-```
-
 
 ## Data Visualization
 
@@ -108,24 +72,6 @@ warnBar takes output from `jobsec::warnExtract` and can plots 3 types of Bar Cha
   - Locality plots total layoffs by locality. Note: its recommended to use `jobsec::warnExtract` to reduce the number of counties
   to <=5 for legibility.
 
-#### warnBar Example
-
-```{r warnBar_example, fig.height = 5, fig.width = 5, fig.align = "center"}
-#Use warnExtract to prep data
-df <- warnExtract(start_date = "2015-01-01", end_date = "2018-12-31", rollup = "year",counties = c("Alameda County", "Fresno County"))
-#plot by locality
-warnBar(df, by = "locality")
-```
-
 ### warnMap
 
 `jobsec::warnMap` takes output from `jobsec::warnExtract` and plots a heatmap of layoffs on a map California by county.
-
-#### warnMap Example
-
-```{r warnMap_example, fig.height = 7, fig.width = 7, fig.align = "center"}
-#Use warnExtract to prep data
-df <- warnExtract(start_date = "2017-01-01", end_date = "2017-12-31")
-#plot
-warnMap(df)
-```
