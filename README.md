@@ -15,6 +15,7 @@ This document introduces users to jobsec's basic tools, including the various da
 
 The primary purpose of jobsec is to scrape the California EDD website to download and process up-to-date current-year WARN data. Users can download WARN reports tables for any fiscal year (or combination of fiscal year) using the function `jobsec::warnDownload`. The dataset `warnSample` provides archived data for fiscal years 2014-2018. A sample of the WARN data format is provided below:
 
+<p align="center">
 <table>
  <thead>
   <tr>
@@ -91,6 +92,7 @@ The primary purpose of jobsec is to scrape the California EDD website to downloa
   </tr>
 </tbody>
 </table>
+</p>
 
 ## Supplementary Data Sources
 
@@ -103,8 +105,12 @@ The datasets `pop` and `acs_data` provided in the `jobsec` package provide some 
 What do prior-year layoff patterns portend for communities under current economic conditions? The `warnModeler` tool is designed to allow policymakers to answer this question under a couple of specifications. `warnModeler` estimates current-year county-level layoffs using prior year layoff observations. The `warnModeler` function predicts furture-year regressions using an OLS model.
 
 The OLS model estimates the following model:
-$$y_{c,t} = \alpha + \beta POP_{c,t-1} + \gamma EDUC_{c,t-1} + \delta LFPR_{c,t-1} + \lambda IND_{c,t-1} + \epsilon_{c,t}$$
-where $c$ represents a county, $t$ represents a year, $POP_{c,t-1}$ is a vector of lagged population variables (total population, male share of population), $EDUC_{c,t-1}$ is a vector of lagged education variables (college share, high school share), $LFPR_{c,t-1}$ is the lagged labor force participation rate,and $IND_{c,t-1}$ is a vector of industry shares. The regression estimates total layoffs on lagged demographic characteristics to align the beginning of the California fiscal year with the survey period when ACS data were collected. 
+
+<p align="center">
+<img src="https://latex.codecogs.com/svg.latex?y_{c,t}&space;=&space;\alpha&space;&plus;&space;\beta&space;POP_{c,t-1}&space;&plus;&space;\gamma&space;EDUC_{c,t-1}&space;&plus;&space;\delta&space;LFPR_{c,t-1}&space;&plus;&space;\lambda&space;IND_{c,t-1}&space;&plus;&space;\epsilon_{c,t}" title="y_{c,t} = \alpha + \beta POP_{c,t-1} + \gamma EDUC_{c,t-1} + \delta LFPR_{c,t-1} + \lambda IND_{c,t-1} + \epsilon_{c,t}" />
+</p>
+
+where c represents a county, t represents a year, POP is a vector of lagged population variables (total population, male share of population), EDUC is a vector of lagged education variables (college share, high school share), LFPR is the lagged labor force participation rate, and IND is a vector of industry shares. The regression estimates total layoffs on lagged demographic characteristics to align the beginning of the California fiscal year with the survey period when ACS data were collected. 
 
 This function is primarily demonstrative - data limitations prevent this function from realizing its full potential. In particular: 
 
@@ -114,6 +120,7 @@ This function is primarily demonstrative - data limitations prevent this functio
 
 Sample output from the `warnModeler` function are available in the `warnPrediction` dataset:
 
+<p align="center">
 <table>
  <thead>
   <tr>
@@ -169,6 +176,7 @@ Sample output from the `warnModeler` function are available in the `warnPredicti
   </tr>
 </tbody>
 </table>
+</p>
 
 ## Data Filtering
 
@@ -191,6 +199,7 @@ The WARN data set does not come in an easily plottable form. Observations includ
 
 WARN from ‘2017-01-01’ through ‘2018-01-01’, rolled up by ‘year’, and by ‘received_date’.
 
+<p align="center">
  <table>
  <thead>
   <tr>
@@ -246,13 +255,13 @@ WARN from ‘2017-01-01’ through ‘2018-01-01’, rolled up by ‘year’, an
   </tr>
 </tbody>
 </table>
-
-
+</p>
 
 #### warnExtract Example 2: Using package predicted data warnPredict
 
 WARN predictions for 2019 for 'Alameda County' and 'Fresno County'.
 
+<p align="center">
 <table>
  <thead>
   <tr>
@@ -277,7 +286,7 @@ WARN predictions for 2019 for 'Alameda County' and 'Fresno County'.
   </tr>
 </tbody>
 </table>
-
+</p>
 ## Data Visualization
 
 Two functions provide visualizations for the WARN data: `jobsec::warnBar` and `jobsec::warnMap`.
