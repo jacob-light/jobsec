@@ -15,6 +15,83 @@ This document introduces users to jobsec's basic tools, including the various da
 
 The primary purpose of jobsec is to scrape the California EDD website to download and process up-to-date current-year WARN data. Users can download WARN reports tables for any fiscal year (or combination of fiscal year) using the function `jobsec::warnDownload`. The dataset `warnSample` provides archived data for fiscal years 2014-2018. A sample of the WARN data format is provided below:
 
+<table>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> notice_date </th>
+   <th style="text-align:left;"> effective_date </th>
+   <th style="text-align:left;"> received_date </th>
+   <th style="text-align:left;"> company </th>
+   <th style="text-align:left;"> city </th>
+   <th style="text-align:left;"> county </th>
+   <th style="text-align:right;"> n_employees </th>
+   <th style="text-align:left;"> layoff_reason </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> 2018-06-29 </td>
+   <td style="text-align:left;"> 2018-08-28 </td>
+   <td style="text-align:left;"> 2018-07-02 </td>
+   <td style="text-align:left;"> Dream Center Education Holdings, LLC </td>
+   <td style="text-align:left;"> Alameda </td>
+   <td style="text-align:left;"> Alameda County </td>
+   <td style="text-align:right;"> 78 </td>
+   <td style="text-align:left;"> Closure Permanent </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 2018-06-29 </td>
+   <td style="text-align:left;"> 2018-08-28 </td>
+   <td style="text-align:left;"> 2018-07-02 </td>
+   <td style="text-align:left;"> Dream Center Education Holdings, LLC </td>
+   <td style="text-align:left;"> Ontario </td>
+   <td style="text-align:left;"> San Bernardino County </td>
+   <td style="text-align:right;"> 88 </td>
+   <td style="text-align:left;"> Closure Permanent </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 2018-06-29 </td>
+   <td style="text-align:left;"> 2018-08-28 </td>
+   <td style="text-align:left;"> 2018-07-02 </td>
+   <td style="text-align:left;"> Dream Center Education Holdings, LLC </td>
+   <td style="text-align:left;"> Sacramento </td>
+   <td style="text-align:left;"> Sacramento County </td>
+   <td style="text-align:right;"> 124 </td>
+   <td style="text-align:left;"> Closure Permanent </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 2018-06-29 </td>
+   <td style="text-align:left;"> 2018-08-28 </td>
+   <td style="text-align:left;"> 2018-07-02 </td>
+   <td style="text-align:left;"> Dream Center Education Holdings, LLC </td>
+   <td style="text-align:left;"> San Bernardino </td>
+   <td style="text-align:left;"> San Bernardino County </td>
+   <td style="text-align:right;"> 110 </td>
+   <td style="text-align:left;"> Closure Permanent </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 2018-06-29 </td>
+   <td style="text-align:left;"> 2018-08-28 </td>
+   <td style="text-align:left;"> 2018-07-02 </td>
+   <td style="text-align:left;"> Dream Center Education Holdings, LLC </td>
+   <td style="text-align:left;"> San Francisco </td>
+   <td style="text-align:left;"> San Francisco County </td>
+   <td style="text-align:right;"> 138 </td>
+   <td style="text-align:left;"> Closure Permanent </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 2018-06-29 </td>
+   <td style="text-align:left;"> 2018-08-28 </td>
+   <td style="text-align:left;"> 2018-07-02 </td>
+   <td style="text-align:left;"> Dream Center Education Holdings, LLC </td>
+   <td style="text-align:left;"> Santa Ana </td>
+   <td style="text-align:left;"> Orange County </td>
+   <td style="text-align:right;"> 161 </td>
+   <td style="text-align:left;"> Closure Permanent </td>
+  </tr>
+</tbody>
+</table>
+
 ## Supplementary Data Sources
 
 The WARN data, alone, provide an incomplete picture of the threat concentrated layoffs pose to local economies in California. The closure of a factory in Los Angeles, for example, is far less disruptive than the closure of an equally-sized factory in Fresno, which is less disruptive than the closure of an equally-sized factory in San Lucas. Thus, for any modeling or robust analysis, knowing some information about local communities can help policymakers assess the consequences of an announced layoff.
@@ -37,6 +114,62 @@ This function is primarily demonstrative - data limitations prevent this functio
 
 Sample output from the `warnModeler` function are available in the `warnPrediction` dataset:
 
+<table>
+ <thead>
+  <tr>
+   <th style="text-align:left;">   </th>
+   <th style="text-align:right;"> year </th>
+   <th style="text-align:left;"> county </th>
+   <th style="text-align:right;"> n_layoffs </th>
+   <th style="text-align:left;"> type </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> 343 </td>
+   <td style="text-align:right;"> 2019 </td>
+   <td style="text-align:left;"> Trinity County </td>
+   <td style="text-align:right;"> -0.3153697 </td>
+   <td style="text-align:left;"> OLS </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 344 </td>
+   <td style="text-align:right;"> 2019 </td>
+   <td style="text-align:left;"> Tulare County </td>
+   <td style="text-align:right;"> 157.2726096 </td>
+   <td style="text-align:left;"> OLS </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 345 </td>
+   <td style="text-align:right;"> 2019 </td>
+   <td style="text-align:left;"> Tuolumne County </td>
+   <td style="text-align:right;"> 4.5120846 </td>
+   <td style="text-align:left;"> OLS </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 346 </td>
+   <td style="text-align:right;"> 2019 </td>
+   <td style="text-align:left;"> Ventura County </td>
+   <td style="text-align:right;"> 1006.3577420 </td>
+   <td style="text-align:left;"> OLS </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 347 </td>
+   <td style="text-align:right;"> 2019 </td>
+   <td style="text-align:left;"> Yolo County </td>
+   <td style="text-align:right;"> 23.4117147 </td>
+   <td style="text-align:left;"> OLS </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 348 </td>
+   <td style="text-align:right;"> 2019 </td>
+   <td style="text-align:left;"> Yuba County </td>
+   <td style="text-align:right;"> 6.0215952 </td>
+   <td style="text-align:left;"> OLS </td>
+  </tr>
+</tbody>
+</table>
+
 ## Data Filtering
 
 The WARN data set does not come in an easily plottable form. Observations include multiple ‘dates’ and ‘layoff reasons’.  `jobsec::warnExtract` function provide multiple ways to clean and filter the WARN data set for analysis or plotting. Various filters include:
@@ -53,6 +186,97 @@ The WARN data set does not come in an easily plottable form. Observations includ
   -	jobsec::warnPrecict: 2014-2018 WARN data set  with 2019-20 predictions include with the package
   -	Output from `jobsec::warnDownload` of scraped warn data from 
   -	Output from `jobsec::warnModeler` of predicted warn data
+  
+#### warnExtract Example 1: Using package data warnSample
+
+WARN from ‘2017-01-01’ through ‘2018-01-01’, rolled up by ‘year’, and by ‘received_date’.
+
+ <table>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> received_date </th>
+   <th style="text-align:left;"> county </th>
+   <th style="text-align:left;"> layoff_reason </th>
+   <th style="text-align:right;"> n_employees </th>
+   <th style="text-align:right;"> n_events </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> 2018 </td>
+   <td style="text-align:left;"> Alameda County </td>
+   <td style="text-align:left;"> Closure Permanent </td>
+   <td style="text-align:right;"> 1344 </td>
+   <td style="text-align:right;"> 16 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 2018 </td>
+   <td style="text-align:left;"> Alameda County </td>
+   <td style="text-align:left;"> Layoff Permanent </td>
+   <td style="text-align:right;"> 632 </td>
+   <td style="text-align:right;"> 6 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 2018 </td>
+   <td style="text-align:left;"> Butte County </td>
+   <td style="text-align:left;"> Closure Permanent </td>
+   <td style="text-align:right;"> 209 </td>
+   <td style="text-align:right;"> 2 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 2018 </td>
+   <td style="text-align:left;"> Butte County </td>
+   <td style="text-align:left;"> Layoff Permanent </td>
+   <td style="text-align:right;"> 78 </td>
+   <td style="text-align:right;"> 1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 2018 </td>
+   <td style="text-align:left;"> Contra Costa County </td>
+   <td style="text-align:left;"> Closure Permanent </td>
+   <td style="text-align:right;"> 128 </td>
+   <td style="text-align:right;"> 1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 2018 </td>
+   <td style="text-align:left;"> Contra Costa County </td>
+   <td style="text-align:left;"> Layoff Permanent </td>
+   <td style="text-align:right;"> 251 </td>
+   <td style="text-align:right;"> 4 </td>
+  </tr>
+</tbody>
+</table>
+
+
+
+#### warnExtract Example 2: Using package predicted data warnPredict
+
+WARN predictions for 2019 for 'Alameda County' and 'Fresno County'.
+
+<table>
+ <thead>
+  <tr>
+   <th style="text-align:right;"> date </th>
+   <th style="text-align:left;"> county </th>
+   <th style="text-align:right;"> n_employees </th>
+   <th style="text-align:left;"> type </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:right;"> 2019 </td>
+   <td style="text-align:left;"> Alameda County </td>
+   <td style="text-align:right;"> 4178.7874 </td>
+   <td style="text-align:left;"> OLS </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 2019 </td>
+   <td style="text-align:left;"> Fresno County </td>
+   <td style="text-align:right;"> 727.8287 </td>
+   <td style="text-align:left;"> OLS </td>
+  </tr>
+</tbody>
+</table>
 
 ## Data Visualization
 
@@ -66,7 +290,15 @@ warnBar takes output from `jobsec::warnExtract` and can plots 3 types of Bar Cha
   - Reason: plots total layoffs at the state level by specific layoff reaons
   - Locality plots total layoffs by locality. Note: its recommended to use `jobsec::warnExtract` to reduce the number of counties
   to <=5 for legibility.
+  
+<p align="center">
+  <img src="warnBar_example.png" width="450">
+</p>
 
 ### warnMap
 
 `jobsec::warnMap` takes output from `jobsec::warnExtract` and plots a heatmap of layoffs on a map California by county.
+
+<p align="center">
+  <img src="warnMap_example.png" width="500">
+</p>
