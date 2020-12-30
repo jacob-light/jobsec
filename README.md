@@ -1,9 +1,4 @@
-\usepackage{amssymb}
-\usepackage{amsmath}
-\usepackage{geometry}
-\usepackage{graphicx}
-
-### Introduction to jobsec
+# Introduction to jobsec
 
 ## California WARN Database
 
